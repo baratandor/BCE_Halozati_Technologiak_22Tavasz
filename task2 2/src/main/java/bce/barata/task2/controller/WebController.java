@@ -1,6 +1,7 @@
 package bce.barata.task2.controller;
 
 import bce.barata.task2.models.RegisterModel;
+import bce.barata.task2.models.ReturnValues;
 import bce.barata.task2.models.User;
 import bce.barata.task2.repository.UserRepository;
 import org.bouncycastle.util.encoders.Hex;
@@ -17,6 +18,8 @@ import bce.barata.task2.security.Encoder;
 import javax.validation.Valid;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
 import java.util.Optional;
 
@@ -35,8 +38,7 @@ public class WebController
     }
 
     @PostMapping("/home")
-    public String loginInfo(@Valid User user, BindingResult bindingResult)
-    {
+    public String loginInfo(@Valid User user, BindingResult bindingResult) throws NoSuchAlgorithmException, InvalidKeySpecException {
         if (bindingResult.hasErrors())
         {
             return "login";
@@ -51,8 +53,11 @@ public class WebController
         if (!validUser.isEmpty())
         {
             User loginUser = validUser.get();
-            //if (Encoder.CustomEncoder(user.getPassword()).equals(loginUser.getPassword()))
-            if (user.getPassword().equals(loginUser.getPassword()))
+            System.out.println("created hash "+ Encoder.CustomEncoder(user.getPassword(),loginUser.getSalt()));
+            System.out.println("fetched pw "+loginUser.getPassword());
+            System.out.println("fetched salt "+loginUser.getSalt().toString());
+            if (Encoder.CustomEncoder(user.getPassword(), loginUser.getSalt()).equals(loginUser.getPassword()))
+            //if (user.getPassword().equals(loginUser.getPassword()))
             {
                 return "home";
             }
@@ -71,8 +76,7 @@ public class WebController
     public String showRegister(RegisterModel registerModel) {return "register";}
 
     @PostMapping("/home2")
-    public String registerInfo(@Valid RegisterModel registerModel, BindingResult bindingResult)
-    {
+    public String registerInfo(@Valid RegisterModel registerModel, BindingResult bindingResult) throws NoSuchAlgorithmException, InvalidKeySpecException {
         if (bindingResult.hasErrors())
         {
             return "register";
@@ -83,9 +87,12 @@ public class WebController
         if (!isUserRegistered)
         {
             User regUser = new User();
+            ReturnValues rv = new ReturnValues();
+            rv = Encoder.CustomEncoder(registerModel.getPassword());
             regUser.setName(registerModel.getName());
-            //regUser.setPassword(Encoder.CustomEncoder(registerModel.getPassword()));
-            regUser.setPassword(registerModel.getPassword());
+            regUser.setPassword(rv.getPassword());
+            regUser.setSalt(rv.getSalt());
+            //regUser.setPassword(registerModel.getPassword());
             userRepo.save(regUser);
             return "home2";
         }

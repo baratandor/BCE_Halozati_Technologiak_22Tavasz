@@ -18,6 +18,10 @@ public class User
     @Column(nullable = false, unique = true)
     private String name;
     private String password;
+    private byte[] salt;
+
+    public byte[] getSalt(){return salt;}
+    public void setSalt(byte[] salt){this.salt = salt;}
 
     public User(long id, String name, String password) {}
     public User() {}
