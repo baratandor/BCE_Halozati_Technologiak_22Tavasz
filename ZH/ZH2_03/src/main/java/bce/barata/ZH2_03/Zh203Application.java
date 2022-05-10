@@ -1,4 +1,4 @@
-package edu.corvinus.ZH2_03;
+package bce.barata.ZH2_03;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
